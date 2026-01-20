@@ -9,7 +9,7 @@ import { InferenceClient } from "@huggingface/inference";
 export class CogniAdaptService {
   private readonly router = inject(Router);
   private readonly envService = inject(EnvironmentService);
-  private hf: InferenceClient;
+  private hf: InferenceClient | null = null;
   private chatHistory: { role: string; content: string }[] = [];
 
   // State Signals
@@ -20,7 +20,10 @@ export class CogniAdaptService {
   error = signal<string | null>(null);
 
   constructor() {
+    console.log('CogniAdaptService initializing...');
     const apiKey = this.envService.getHuggingFaceApiKey();
+    console.log('HuggingFace API Key present:', !!apiKey);
+    
     if (!apiKey || apiKey === 'hf_placeholder_key') {
       console.warn('Hugging Face API Key is missing or is a placeholder. Please set VITE_HUGGING_FACE_API_KEY in environment variables.');
     }
@@ -37,12 +40,14 @@ export class CogniAdaptService {
           return fetch(newUrl, init);
         }
       });
+      console.log('InferenceClient initialized successfully');
     } catch (error) {
       console.error('Failed to initialize InferenceClient:', error);
       // Don't break initialization if HF client fails
     }
 
     this.loadProfileFromStorage();
+    console.log('CogniAdaptService initialized');
   }
 
   private loadProfileFromStorage(): void {
@@ -111,6 +116,9 @@ export class CogniAdaptService {
 
   private async callHuggingFaceApi(messages: { role: string; content: string }[]): Promise<string> {
     try {
+      if (!this.hf) {
+        throw new Error('InferenceClient is not initialized. Please check your API key.');
+      }
       const completion = await this.hf.chatCompletion({
         model: "Qwen/Qwen2.5-72B-Instruct",
         messages: messages as any, // Cast to any to avoid strict type issues with role string
