@@ -7,7 +7,7 @@ import { InferenceClient } from "@huggingface/inference";
 
 @Injectable({ providedIn: 'root' })
 export class CogniAdaptService {
-  private readonly router = new Router();
+  private readonly router = inject(Router);
   private readonly envService = inject(EnvironmentService);
   private hf: InferenceClient;
   private chatHistory: { role: string; content: string }[] = [];
