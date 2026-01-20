@@ -6,6 +6,14 @@ import { Injectable } from '@angular/core';
 export class EnvironmentService {
   getHuggingFaceApiKey(): string {
     // Use Vite environment variable - configure via .env file
-    return import.meta.env.VITE_HUGGING_FACE_API_KEY || '';
+    try {
+      const apiKey = (import.meta as any)?.env?.VITE_HUGGING_FACE_API_KEY;
+      if (apiKey) {
+        return apiKey;
+      }
+    } catch (e) {
+      console.warn('Error accessing import.meta.env:', e);
+    }
+    return '';
   }
 }
