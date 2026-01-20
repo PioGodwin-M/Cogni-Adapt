@@ -22,20 +22,25 @@ export class CogniAdaptService {
   constructor() {
     const apiKey = this.envService.getHuggingFaceApiKey();
     if (!apiKey || apiKey === 'hf_placeholder_key') {
-      console.warn('Hugging Face API Key is missing or is a placeholder. Please set it in EnvironmentService.');
+      console.warn('Hugging Face API Key is missing or is a placeholder. Please set VITE_HUGGING_FACE_API_KEY in environment variables.');
     }
 
-    // Initialize InferenceClient with a custom fetch to handle proxying
-    // We avoid using 'endpointUrl' directly because it conflicts with passing a 'model' argument
-    this.hf = new InferenceClient(apiKey, {
-      fetch: (url, init) => {
-        // Rewrite the URL to use our local proxy
-        // Handle both router and api-inference domains, and optional /hf path
-        const urlStr = url.toString();
-        const newUrl = urlStr.replace(/^https?:\/\/(?:router|api-inference)\.huggingface\.co(?:\/hf)?/, '/api/hf');
-        return fetch(newUrl, init);
-      }
-    });
+    try {
+      // Initialize InferenceClient with a custom fetch to handle proxying
+      // We avoid using 'endpointUrl' directly because it conflicts with passing a 'model' argument
+      this.hf = new InferenceClient(apiKey || '', {
+        fetch: (url, init) => {
+          // Rewrite the URL to use our local proxy
+          // Handle both router and api-inference domains, and optional /hf path
+          const urlStr = url.toString();
+          const newUrl = urlStr.replace(/^https?:\/\/(?:router|api-inference)\.huggingface\.co(?:\/hf)?/, '/api/hf');
+          return fetch(newUrl, init);
+        }
+      });
+    } catch (error) {
+      console.error('Failed to initialize InferenceClient:', error);
+      // Don't break initialization if HF client fails
+    }
 
     this.loadProfileFromStorage();
   }
