@@ -5,15 +5,19 @@ import { environment } from '../environments/environment';
   providedIn: 'root'
 })
 export class EnvironmentService {
+  constructor() {
+    console.log('EnvironmentService initialized');
+    console.log('Environment production:', environment.production);
+    console.log('Hugging Face API Key available:', !!environment.huggingFaceApiKey);
+  }
+
   getHuggingFaceApiKey(): string {
     const apiKey = environment.huggingFaceApiKey;
-    console.log('EnvironmentService - Hugging Face API Key from environment:', apiKey ? 'PRESENT' : 'MISSING');
-    console.log('EnvironmentService - API Key length:', apiKey?.length || 0);
     if (apiKey && apiKey.length > 0) {
-      console.log('EnvironmentService - API Key found:', apiKey.substring(0, 10) + '...');
+      console.log('EnvironmentService - API Key found (length:', apiKey.length + ')');
       return apiKey;
     }
-    console.warn('EnvironmentService - Hugging Face API Key is missing from environment file');
+    console.warn('EnvironmentService - Hugging Face API Key is missing. Make sure VITE_HUGGING_FACE_API_KEY is set in environment variables.');
     return '';
   }
 }
