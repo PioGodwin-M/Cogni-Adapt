@@ -1,8 +1,9 @@
 // Get environment variable safely, handling cases where import.meta is undefined
-function getEnvVar(key: string): string {
+function getEnvVar(key: keyof ImportMetaEnv): string {
   try {
     if (typeof import.meta !== 'undefined' && import.meta.env) {
-      return (import.meta.env as any)[key] || '';
+      const value = import.meta.env[key];
+      return value || '';
     }
   } catch (e) {
     // import.meta not available in production
