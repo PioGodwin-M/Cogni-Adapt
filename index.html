@@ -16,6 +16,36 @@
       font-family: 'OpenDyslexic', sans-serif;
     }
   </style>
+  <!-- Inject environment variables from window location search params or meta tags -->
+  <script>
+    // This script runs before the app initializes to set up global environment variables
+    // For Vercel deployments, environment variables are injected as query params or meta tags
+    (function() {
+      // Try to get from data attributes on html element (can be set by build script)
+      const htmlEl = document.documentElement;
+      const hfKey = htmlEl.getAttribute('data-vite-hugging-face-api-key');
+      const gKey = htmlEl.getAttribute('data-vite-gemini-api-key');
+      
+      if (hfKey) {
+        window.__VITE_HUGGING_FACE_API_KEY__ = hfKey;
+        console.log('✓ Set __VITE_HUGGING_FACE_API_KEY__ from HTML data attribute');
+      }
+      if (gKey) {
+        window.__VITE_GEMINI_API_KEY__ = gKey;
+        console.log('✓ Set __VITE_GEMINI_API_KEY__ from HTML data attribute');
+      }
+      
+      // Try to get from environment variables passed as globals (for local dev)
+      if (typeof __VITE_HUGGING_FACE_API_KEY__ !== 'undefined') {
+        window.__VITE_HUGGING_FACE_API_KEY__ = __VITE_HUGGING_FACE_API_KEY__;
+        console.log('✓ __VITE_HUGGING_FACE_API_KEY__ available from build globals');
+      }
+      if (typeof __VITE_GEMINI_API_KEY__ !== 'undefined') {
+        window.__VITE_GEMINI_API_KEY__ = __VITE_GEMINI_API_KEY__;
+        console.log('✓ __VITE_GEMINI_API_KEY__ available from build globals');
+      }
+    })();
+  </script>
 <script type="importmap">
 {
   "imports": {
