@@ -2,18 +2,18 @@
 
 ## Environment Setup
 
-This project requires a Gemini API key to function. 
+This project requires a HuggingFace API key to function. 
 
 ### Get Your API Key
-1. Visit https://aistudio.google.com/apikey
-2. Create or select a project
-3. Generate an API key
+1. Visit https://huggingface.co/settings/tokens
+2. Create a new access token (read permission is sufficient)
+3. Copy the token
 
 ### Local Development
-1. Copy `.env.example` to `.env.local`
+1. Create `.env.local` file in the project root
 2. Add your API key:
    ```
-   VITE_GEMINI_API_KEY=your_actual_api_key_here
+   VITE_HUGGING_FACE_API_KEY=your_huggingface_api_key_here
    ```
 
 ## Vercel Deployment
@@ -23,8 +23,8 @@ This project requires a Gemini API key to function.
 2. Go to https://vercel.com/new
 3. Import your repository
 4. Add environment variable:
-   - Key: `VITE_GEMINI_API_KEY`
-   - Value: Your Gemini API key
+   - Key: `VITE_HUGGING_FACE_API_KEY`
+   - Value: Your HuggingFace API key
 5. Deploy
 
 ### Option 2: Deploy via Vercel CLI
@@ -39,7 +39,7 @@ vercel login
 vercel
 
 # Add environment variable
-vercel env add VITE_GEMINI_API_KEY
+vercel env add VITE_HUGGING_FACE_API_KEY
 
 # Deploy to production
 vercel --prod
@@ -51,20 +51,32 @@ vercel --prod
 - Environment variables must be prefixed with `VITE_` to be accessible in the browser
 - Never commit `.env.local` to version control (it's already in `.gitignore`)
 - The API key will be exposed in the browser bundle - this is expected for client-side apps
+- The app uses HuggingFace's Qwen2.5-72B-Instruct model for content transformation and chatbot features
 - Consider implementing rate limiting and usage monitoring in production
 
 ## Troubleshooting
 
-### API Key Not Working
-- Ensure the variable name is exactly `VITE_GEMINI_API_KEY`
-- Restart the dev server after changing environment variables
-- Check that the API key is valid at https://aistudio.google.com/apikey
+### API Key Not Working on Vercel
+- Ensure the variable name is exactly `VITE_HUGGING_FACE_API_KEY` in Vercel dashboard
+- **After adding environment variables, you MUST redeploy your project**
+- Check that the API key is valid at https://huggingface.co/settings/tokens
+- Verify the token has proper read permissions
+- Check Vercel deployment logs for any initialization errors
 
 ### Build Errors on Vercel
 - Verify all dependencies are in `package.json`
 - Check that Node.js version is compatible (18.x or higher recommended)
 - Review build logs in Vercel dashboard
+- Ensure the build command is: `npm run build`
 
 ### Routing Issues
 - The `vercel.json` rewrites configuration handles Angular routing
 - All routes redirect to `index.html` for client-side routing
+
+## Verification
+
+After deployment, verify that:
+1. The site loads without errors
+2. You can navigate to different pages/routes
+3. The chatbot and content transformation features work
+4. No console errors related to missing API keys
