@@ -1,13 +1,21 @@
-// Get environment variable safely, handling cases where import.meta is undefined
+// Get environment variable safely, with multiple fallback approaches
 function getEnvVar(key: keyof ImportMetaEnv): string {
   try {
-    if (typeof import.meta !== 'undefined' && import.meta.env) {
+    // Try import.meta.env first (development)
+    if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env[key]) {
       const value = import.meta.env[key];
-      return value || '';
+      if (value) return value;
     }
   } catch (e) {
-    // import.meta not available in production
+    // ignore
   }
+
+  // Try window globals (injected by Vite define)
+  const globalKey = `__${key}__` as const;
+  if (typeof window !== 'undefined' && (window as any)[globalKey]) {
+    return (window as any)[globalKey];
+  }
+
   return '';
 }
 

@@ -1,11 +1,13 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  // Environment variables are automatically exposed to import.meta.env
-  // Just ensure they're available in the build environment
+  // Inject environment variables as globals during build
   define: {
-    'import.meta.env.VITE_HUGGING_FACE_API_KEY': JSON.stringify(process.env.VITE_HUGGING_FACE_API_KEY),
-    'import.meta.env.VITE_GEMINI_API_KEY': JSON.stringify(process.env.VITE_GEMINI_API_KEY)
+    '__VITE_HUGGING_FACE_API_KEY__': JSON.stringify(process.env.VITE_HUGGING_FACE_API_KEY || ''),
+    '__VITE_GEMINI_API_KEY__': JSON.stringify(process.env.VITE_GEMINI_API_KEY || ''),
+    // Also try to make them available via import.meta.env fallback
+    'import.meta.env.VITE_HUGGING_FACE_API_KEY': JSON.stringify(process.env.VITE_HUGGING_FACE_API_KEY || ''),
+    'import.meta.env.VITE_GEMINI_API_KEY': JSON.stringify(process.env.VITE_GEMINI_API_KEY || '')
   },
   ssr: false
 });
