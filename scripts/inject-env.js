@@ -12,18 +12,17 @@ const path = require('path');
 try {
   const indexPath = path.join(__dirname, '../dist/index.html');
   
-  // Get environment variables
-  const hfKey = process.env.VITE_HUGGING_FACE_API_KEY || '';
-  const gKey = process.env.VITE_GEMINI_API_KEY || '';
+  // Get environment variables - Vercel injects these
+  const hfKey = process.env.VITE_HUGGING_FACE_API_KEY;
+  const gKey = process.env.VITE_GEMINI_API_KEY;
   
-  console.log('Injecting environment variables into index.html...');
-  console.log('VITE_HUGGING_FACE_API_KEY available:', !!hfKey);
-  console.log('VITE_GEMINI_API_KEY available:', !!gKey);
+  console.log('=== inject-env.js running ===');
+  console.log('VITE_HUGGING_FACE_API_KEY:', hfKey ? 'SET (' + hfKey.length + ' chars)' : 'NOT SET');
+  console.log('VITE_GEMINI_API_KEY:', gKey ? 'SET (' + gKey.length + ' chars)' : 'NOT SET');
   
   if (!fs.existsSync(indexPath)) {
     console.warn('⚠ index.html not found at', indexPath);
-    console.warn('Build might still be in progress or dist folder not created');
-    process.exit(0); // Don't fail the build if HTML doesn't exist yet
+    process.exit(0); // Don't fail - dist might be in different location
   }
   
   let html = fs.readFileSync(indexPath, 'utf8');
@@ -31,31 +30,48 @@ try {
   // Create injection script with proper escaping
   const scriptInjection = `
     <script>
-      try {
-        window.__VITE_HUGGING_FACE_API_KEY__ = ${JSON.stringify(hfKey)};
-        window.__VITE_GEMINI_API_KEY__ = ${JSON.stringify(gKey)};
-        if (${!!hfKey} || ${!!gKey}) {
-          console.log('✓ Environment variables injected into window object');
+      (function() {
+        try {
+          var hfKey = ${JSON.stringify(hfKey || '')};
+          var gKey = ${JSON.stringify(gKey || '')};
+          
+          if (hfKey) {
+            window.__VITE_HUGGING_FACE_API_KEY__ = hfKey;
+            console.log('✓ HuggingFace API Key injected');
+          }
+          if (gKey) {
+            window.__VITE_GEMINI_API_KEY__ = gKey;
+            console.log('✓ Gemini API Key injected');
+          }
+          
+          if (!hfKey && !gKey) {
+            console.warn('⚠️ No API keys were available during build');
+          }
+        } catch(e) {
+          console.error('Error in env injection:', e);
         }
-      } catch(e) {
-        console.error('Error injecting env vars:', e);
-      }
+      })();
     </script>
   `;
   
-  // Insert before closing head tag
+  // Find and replace the closing head tag
   if (html.includes('</head>')) {
     html = html.replace('</head>', scriptInjection + '\n  </head>');
-  } else {
-    console.warn('⚠ Could not find </head> tag, appending to start of body');
+    console.log('✓ Injected script into </head>');
+  } else if (html.includes('<body>')) {
     html = html.replace('<body>', '<body>' + scriptInjection);
+    console.log('✓ Injected script into <body>');
+  } else {
+    console.warn('⚠ Could not find injection point in HTML');
+    process.exit(0);
   }
   
   fs.writeFileSync(indexPath, html, 'utf8');
-  console.log('✓ Successfully injected environment variables into index.html');
+  console.log('✓ Successfully wrote modified index.html');
   process.exit(0);
 } catch (error) {
-  console.error('❌ Error injecting environment variables:', error.message);
+  console.error('❌ Error:', error.message);
   console.error(error);
-  process.exit(1);
+  // Don't fail the build
+  process.exit(0);
 }
