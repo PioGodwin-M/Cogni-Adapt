@@ -1,21 +1,26 @@
 // Get environment variable safely, with multiple fallback approaches
 function getEnvVar(key: 'VITE_GEMINI_API_KEY' | 'VITE_HUGGING_FACE_API_KEY'): string {
+  // First, try window globals (injected by Vite define or Vercel)
+  const globalKey = `__${key}__`;
+  if (typeof window !== 'undefined' && (window as any)[globalKey]) {
+    console.log(`Found ${key} in window globals`);
+    return (window as any)[globalKey];
+  }
+
+  // Try import.meta.env (fallback for some build systems)
   try {
-    // Try import.meta.env first (development)
     if (typeof import.meta !== 'undefined' && (import.meta as any).env && (import.meta as any).env[key]) {
       const value = (import.meta as any).env[key];
-      if (value) return value;
+      if (value) {
+        console.log(`Found ${key} in import.meta.env`);
+        return value;
+      }
     }
   } catch (e) {
     // ignore
   }
 
-  // Try window globals (injected by Vite define)
-  const globalKey = `__${key}__`;
-  if (typeof window !== 'undefined' && (window as any)[globalKey]) {
-    return (window as any)[globalKey];
-  }
-
+  console.warn(`${key} not found in any configuration source`);
   return '';
 }
 

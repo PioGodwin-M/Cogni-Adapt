@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run build",
+  "buildCommand": "VITE_HUGGING_FACE_API_KEY=$VITE_HUGGING_FACE_API_KEY VITE_GEMINI_API_KEY=$VITE_GEMINI_API_KEY npm run build",
   "outputDirectory": "dist",
   "devCommand": "npm run dev",
   "installCommand": "npm install --legacy-peer-deps",
