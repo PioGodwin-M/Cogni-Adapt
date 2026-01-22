@@ -1,4 +1,5 @@
 export const environment = {
   production: false,
-  geminiApiKey: (import.meta as any).env?.VITE_GEMINI_API_KEY || ''
+  geminiApiKey: import.meta.env.VITE_GEMINI_API_KEY || '',
+  huggingFaceApiKey: import.meta.env.VITE_HUGGING_FACE_API_KEY || ''
 };

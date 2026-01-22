@@ -23,24 +23,21 @@ export class CogniAdaptService {
     console.log('CogniAdaptService initializing...');
     const apiKey = this.envService.getHuggingFaceApiKey();
     console.log('HuggingFace API Key present:', !!apiKey);
+    console.log('API Key length:', apiKey?.length);
+    console.log('API Key first 10 chars:', apiKey?.substring(0, 10));
     
-    if (!apiKey || apiKey === 'hf_placeholder_key') {
-      console.warn('Hugging Face API Key is missing or is a placeholder. Please set VITE_HUGGING_FACE_API_KEY in environment variables.');
+    if (!apiKey) {
+      console.error('CRITICAL: Hugging Face API Key is missing. Please set VITE_HUGGING_FACE_API_KEY in environment variables.');
     }
 
     try {
-      // Initialize InferenceClient with a custom fetch to handle proxying
-      // We avoid using 'endpointUrl' directly because it conflicts with passing a 'model' argument
-      this.hf = new InferenceClient(apiKey || '', {
-        fetch: (url, init) => {
-          // Rewrite the URL to use our local proxy
-          // Handle both router and api-inference domains, and optional /hf path
-          const urlStr = url.toString();
-          const newUrl = urlStr.replace(/^https?:\/\/(?:router|api-inference)\.huggingface\.co(?:\/hf)?/, '/api/hf');
-          return fetch(newUrl, init);
-        }
-      });
-      console.log('InferenceClient initialized successfully');
+      // Initialize InferenceClient with the API key as a string
+      if (apiKey && apiKey.length > 0) {
+        this.hf = new InferenceClient(apiKey);
+        console.log('InferenceClient initialized successfully with token');
+      } else {
+        console.error('Cannot initialize InferenceClient: API key is missing or empty');
+      }
     } catch (error) {
       console.error('Failed to initialize InferenceClient:', error);
       // Don't break initialization if HF client fails

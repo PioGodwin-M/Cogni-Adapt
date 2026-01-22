@@ -1,19 +1,19 @@
 import { Injectable } from '@angular/core';
+import { environment } from '../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class EnvironmentService {
   getHuggingFaceApiKey(): string {
-    // Use Vite environment variable - configure via .env file
-    try {
-      const apiKey = (import.meta as any)?.env?.VITE_HUGGING_FACE_API_KEY;
-      if (apiKey) {
-        return apiKey;
-      }
-    } catch (e) {
-      console.warn('Error accessing import.meta.env:', e);
+    const apiKey = environment.huggingFaceApiKey;
+    console.log('EnvironmentService - Hugging Face API Key from environment:', apiKey ? 'PRESENT' : 'MISSING');
+    console.log('EnvironmentService - API Key length:', apiKey?.length || 0);
+    if (apiKey && apiKey.length > 0) {
+      console.log('EnvironmentService - API Key found:', apiKey.substring(0, 10) + '...');
+      return apiKey;
     }
+    console.warn('EnvironmentService - Hugging Face API Key is missing from environment file');
     return '';
   }
 }
