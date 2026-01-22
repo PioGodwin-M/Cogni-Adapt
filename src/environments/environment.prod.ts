@@ -1,28 +1,30 @@
-// Get environment variable safely, with multiple fallback approaches
+// Production environment configuration
+// Environment variables are injected by scripts/inject-env.js or Vercel build process
 function getEnvVar(key: 'VITE_GEMINI_API_KEY' | 'VITE_HUGGING_FACE_API_KEY'): string {
-  // First, try window globals (injected by Vite define or Vercel)
+  // Check window globals first (injected by inject-env.js)
   const globalKey = `__${key}__`;
   if (typeof window !== 'undefined' && (window as any)[globalKey]) {
-    console.log(`✓ Found ${key} in window globals:`, (window as any)[globalKey].substring(0, 10) + '...');
+    console.log(`✓ ${key} found in window.${globalKey}`);
     return (window as any)[globalKey];
   }
-  console.log(`✗ ${globalKey} not found in window`);
-
-  // Try import.meta.env (fallback for some build systems)
+  
+  // Try import.meta.env
   try {
-    if (typeof import.meta !== 'undefined' && (import.meta as any).env && (import.meta as any).env[key]) {
+    if (typeof import.meta !== 'undefined' && (import.meta as any).env?.[key]) {
       const value = (import.meta as any).env[key];
       if (value) {
-        console.log(`✓ Found ${key} in import.meta.env:`, value.substring(0, 10) + '...');
+        console.log(`✓ ${key} found in import.meta.env`);
         return value;
       }
     }
   } catch (e) {
     // ignore
   }
-  console.log(`✗ ${key} not found in import.meta.env`);
 
-  console.warn(`❌ ${key} not found in any configuration source`);
+  console.warn(`⚠️ ${key} not found. Please set it in Vercel Environment Variables.`);
+  console.warn(`   Go to: Vercel Dashboard → Project Settings → Environment Variables`);
+  console.warn(`   Add: ${key} = your_api_key`);
+  
   return '';
 }
 
