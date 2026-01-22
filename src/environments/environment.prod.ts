@@ -3,24 +3,26 @@ function getEnvVar(key: 'VITE_GEMINI_API_KEY' | 'VITE_HUGGING_FACE_API_KEY'): st
   // First, try window globals (injected by Vite define or Vercel)
   const globalKey = `__${key}__`;
   if (typeof window !== 'undefined' && (window as any)[globalKey]) {
-    console.log(`Found ${key} in window globals`);
+    console.log(`✓ Found ${key} in window globals:`, (window as any)[globalKey].substring(0, 10) + '...');
     return (window as any)[globalKey];
   }
+  console.log(`✗ ${globalKey} not found in window`);
 
   // Try import.meta.env (fallback for some build systems)
   try {
     if (typeof import.meta !== 'undefined' && (import.meta as any).env && (import.meta as any).env[key]) {
       const value = (import.meta as any).env[key];
       if (value) {
-        console.log(`Found ${key} in import.meta.env`);
+        console.log(`✓ Found ${key} in import.meta.env:`, value.substring(0, 10) + '...');
         return value;
       }
     }
   } catch (e) {
     // ignore
   }
+  console.log(`✗ ${key} not found in import.meta.env`);
 
-  console.warn(`${key} not found in any configuration source`);
+  console.warn(`❌ ${key} not found in any configuration source`);
   return '';
 }
 
